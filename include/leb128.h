@@ -43,20 +43,31 @@ namespace LEB128 {
 
     string toSignedLeb128(const int &number) {
         if (!number) {
-            return "0";
+            return "00000000";
         }
 
         string binary{bitset<17>(abs(number)).to_string()};
         binary.erase(0, binary.find_first_not_of('0'));
         binary = "0" + binary;
-
-        cout << binary << endl;
         
         if (number < 0) {
             binary = getTwoscomplement(binary);
         }
 
         fillWithSign(binary, number >= 0 ? '0' : '1');
+
+        return translatePosition(binary);   
+    }
+
+    string toUnsignedLeb128(const int &number) {
+        if (!number) {
+            return "00000000";
+        }
+
+        string binary{bitset<17>(number).to_string()};
+        binary.erase(0, binary.find_first_not_of('0'));
+
+        fillWithSign(binary, '0');
 
         return translatePosition(binary);   
     }
@@ -84,7 +95,7 @@ namespace LEB128 {
         binary.erase(0, binary.find_first_not_of('0'));
 
         int decimal = (int)bitset<17>(binary).to_ulong();
-        
+
         if (isNegative) {
             decimal = -decimal;
         }

@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
 
 
     cout << LEB128::signedLeb128toDecimal(LEB128::toSignedLeb128(start)) << endl;
+    cout << LEB128::toUnsignedLeb128(start) << endl;
     
     // while(true) {
     //     promise<string> promise;
