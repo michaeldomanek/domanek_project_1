@@ -7,6 +7,7 @@
 #include <string>
 #include <future>
 #include <chrono>
+#include <random>
 
 using namespace std;
 
@@ -67,31 +68,28 @@ int main(int argc, char* argv[]) {
         return throwValidationError(app, "--start --end: start must be smaller than end");
     }
 
+    random_device rd;
+    mt19937 gen{rd()};
+    uniform_int_distribution<> dis{start, end};
+
     while(true) {
         promise<string> promise;
         future<string> future{promise.get_future()};
 
-        thread t1{[&promise]{
-            int value = 9001; //generate random later
+        thread t1{[&]{
+            int value{dis(gen)};
 
-            promise.set_value(LEB128::toUnsignedLeb128(value));
+            cout << value << endl;
+
+            promise.set_value(LEB128::toSignedLeb128(value));
             this_thread::sleep_for(chrono::seconds(1));
         }};
 
-        this_thread::sleep_for(chrono::seconds(1));
-
         thread t2{[&future]{
-            cout << LEB128::unsignedLeb128toDecimal(future.get()) << endl;
+            cout << LEB128::signedLeb128toDecimal(future.get()) << endl;
         }};
 
         t1.join();
         t2.join();
     }
-
-    // random_device rd;
-    // mt19937 gen{rd()};
-    // uniform_int_distribution<> dis{0, 100};
-
-    
-    
 }
