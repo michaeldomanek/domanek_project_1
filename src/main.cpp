@@ -19,7 +19,6 @@ auto throwValidationError(const CLI::App &app, const string &error) {
     }
 }
 
-
 int main(int argc, char* argv[]) {
     CLI::App app{"Simulation of data transfer with LEB128"};
 
@@ -57,8 +56,7 @@ int main(int argc, char* argv[]) {
     app.add_option("--file-output-name", fileOutputPath, "Name of plain output file");
 
     startOption->excludes(valuesOption);
-    startOption->needs(endOption);
-    endOption->needs(startOption);
+    endOption->excludes(valuesOption);
 
     CLI11_PARSE(app, argc, argv);
 
@@ -78,15 +76,30 @@ int main(int argc, char* argv[]) {
 
         thread t1{[&]{
             int value{dis(gen)};
+            string binary;
 
             cout << value << endl;
 
-            promise.set_value(LEB128::toSignedLeb128(value));
+            if (transferUnsigned) {
+                binary = LEB128::toUnsignedLeb128(value);
+            } else {
+                binary = LEB128::toSignedLeb128(value);
+            }
+            promise.set_value(binary);
             this_thread::sleep_for(chrono::seconds(1));
         }};
 
-        thread t2{[&future]{
-            cout << LEB128::signedLeb128toDecimal(future.get()) << endl;
+        thread t2{[&]{
+            string binary = future.get();
+            int value;
+
+            if (transferUnsigned) {
+                value = LEB128::unsignedLeb128toDecimal(binary);
+            } else {
+                value = LEB128::signedLeb128toDecimal(binary);
+            }
+            
+            cout << value << endl;
         }};
 
         t1.join();
