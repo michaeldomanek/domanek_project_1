@@ -1,5 +1,6 @@
-#include "CLI11.hpp"
 #include "leb128.h"
+#include "CLI11.hpp"
+#include "json.hpp"
 
 #include <iostream>
 #include <thread>
@@ -8,8 +9,18 @@
 #include <future>
 #include <chrono>
 #include <random>
+#include <fstream>
 
 using namespace std;
+using json = nlohmann::json;
+
+int getNextElement(const vector<int> &values) {
+    static vector<int>::size_type i = 0;
+    if(i == values.size()) {
+        i = 0;
+    }
+    return values[i++];
+}
 
 auto throwValidationError(const CLI::App &app, const string &error) {
     try {
@@ -17,6 +28,11 @@ auto throwValidationError(const CLI::App &app, const string &error) {
     } catch (const CLI::Error &e) {
         return app.exit(e);
     }
+}
+
+auto writeJsonFile(const string &name, const json &outputJson) {
+    ofstream o(name);
+    o << std::setw(4) << outputJson << endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -49,14 +65,14 @@ int main(int argc, char* argv[]) {
         ->check(CLI::Range(-100000, 100000))
     };
 
-    string jsonOutputPath;
-    app.add_option("--json-output-name", jsonOutputPath, "Name of json output file");
+    string jsonOutputName;
+    app.add_option("--json-output-name", jsonOutputName, "Name of json output file");
 
-    string tomlOutputPath;
-    app.add_option("--toml-output-name", tomlOutputPath, "Name of toml output file");
+    string tomlOutputName;
+    app.add_option("--toml-output-name", tomlOutputName, "Name of toml output file");
 
-    string fileOutputPath;
-    app.add_option("--file-output-name", fileOutputPath, "Name of plain output file");
+    string fileOutputname;
+    app.add_option("--file-output-name", fileOutputname, "Name of plain output file");
 
     startOption->excludes(valuesOption);
     endOption->excludes(valuesOption);
@@ -77,13 +93,36 @@ int main(int argc, char* argv[]) {
     mt19937 gen{rd()};
     uniform_int_distribution<> dis{start, end};
 
-    while(true) {
+    json outputJson;
+
+    if(jsonOutputName != "") {
+        if(values.size()) {
+            outputJson["values"] = values;
+        } else {
+            outputJson["start"] = start;
+            outputJson["end"] = end;
+        }
+
+        outputJson["unsigned"] = transferUnsigned;
+        outputJson["show-encoded"] = showEncoded;
+        outputJson["delay"] = delay;
+        outputJson["data"] = json::array();
+        writeJsonFile(jsonOutputName, outputJson);
+    }
+
+    while (true) {
         promise<string> promise;
         future<string> future{promise.get_future()};
 
         thread t1{[&]{
-            int value{dis(gen)};
             string binary;
+            int value;
+
+            if(values.size()) {
+                value = getNextElement(values);
+            } else {
+                value = dis(gen);
+            }
 
             cout << "value to transfer: " << value << endl;
 
@@ -93,10 +132,15 @@ int main(int argc, char* argv[]) {
                 binary = LEB128::toSignedLeb128(value);
             }
 
+            if(jsonOutputName != "") {
+                outputJson["data"].push_back({{"transfered", value}});
+                writeJsonFile(jsonOutputName, outputJson);
+            }
+
             if (showEncoded) {
                 cout << "encoded value: " << binary << endl;
             }
-            
+
             promise.set_value(binary);
             this_thread::sleep_for(chrono::milliseconds(delay));
         }};
@@ -109,6 +153,11 @@ int main(int argc, char* argv[]) {
                 value = LEB128::unsignedLeb128toDecimal(binary);
             } else {
                 value = LEB128::signedLeb128toDecimal(binary);
+            }
+
+            if(jsonOutputName != "") {
+                outputJson["data"].back().push_back({"received", value});
+                writeJsonFile(jsonOutputName, outputJson);
             }
             
             cout << "received value: " << value << endl;
