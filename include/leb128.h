@@ -102,4 +102,25 @@ namespace LEB128 {
         
         return decimal;
     }
+
+    int unsignedLeb128toDecimal(string value) {
+        string binary{""};
+        
+        while (true) {
+            bool isLastByte{value.front() == '0'};
+
+            binary = value.substr(1, 7) + binary;
+            value.erase(0, 8);
+
+            if (isLastByte) {
+                break;
+            }
+        }
+
+        binary.erase(0, binary.find_first_not_of('0'));
+
+        int decimal = (int)bitset<17>(binary).to_ulong();
+        
+        return decimal;
+    }
 }
