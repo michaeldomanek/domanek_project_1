@@ -67,28 +67,26 @@ int main(int argc, char* argv[]) {
         return throwValidationError(app, "--start --end: start must be smaller than end");
     }
 
+    while(true) {
+        promise<string> promise;
+        future<string> future{promise.get_future()};
 
-    cout << LEB128::toUnsignedLeb128(start) << endl;
-    cout << LEB128::unsignedLeb128toDecimal(LEB128::toUnsignedLeb128(start)) << endl;
+        thread t1{[&promise]{
+            int value = 9001; //generate random later
 
-    // while(true) {
-    //     promise<string> promise;
-    //     future<string> future{promise.get_future()};
+            promise.set_value(LEB128::toUnsignedLeb128(value));
+            this_thread::sleep_for(chrono::seconds(1));
+        }};
 
-    //     thread t1{[&promise]{
-    //         promise.set_value("1101000101111000");
-    //         this_thread::sleep_for(chrono::seconds(1));
-    //     }};
+        this_thread::sleep_for(chrono::seconds(1));
 
-    //     this_thread::sleep_for(chrono::seconds(1));
+        thread t2{[&future]{
+            cout << LEB128::unsignedLeb128toDecimal(future.get()) << endl;
+        }};
 
-    //     thread t2{[&future]{
-    //         cout << future.get() << endl;
-    //     }};
-
-    //     t1.join();
-    //     t2.join();
-    // }
+        t1.join();
+        t2.join();
+    }
 
     // random_device rd;
     // mt19937 gen{rd()};
