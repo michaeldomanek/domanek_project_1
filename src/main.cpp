@@ -23,9 +23,12 @@ int main(int argc, char* argv[]) {
     CLI::App app{"Simulation of data transfer with LEB128"};
 
     bool transferUnsigned{false};
-    app.add_flag("-u,--unsigned", transferUnsigned, "Encode with unsigned Leb128");
+    app.add_flag("-u,--unsigned", transferUnsigned, "Encode with unsigned LEB128");
 
-    int start{-100000};
+    bool showEncoded{false};
+    app.add_flag("--show-encoded", showEncoded, "Show encoded values");
+
+    int start{-100001};
     auto startOption {
         app.add_option("-s,--start", start, "Start of the range of random numbers")
         ->check(CLI::Range(-100000, 100000))
@@ -60,6 +63,10 @@ int main(int argc, char* argv[]) {
 
     CLI11_PARSE(app, argc, argv);
 
+    if (start == -100001) {
+        start = transferUnsigned ? 0 : -100000;
+    }
+
     if(transferUnsigned and start < 0) {
         return throwValidationError(app, "--start: start must be between 0 and 100000");
     } else if (start > end) {
@@ -78,15 +85,20 @@ int main(int argc, char* argv[]) {
             int value{dis(gen)};
             string binary;
 
-            cout << value << endl;
+            cout << "value to transfer: " << value << endl;
 
             if (transferUnsigned) {
                 binary = LEB128::toUnsignedLeb128(value);
             } else {
                 binary = LEB128::toSignedLeb128(value);
             }
+
+            if (showEncoded) {
+                cout << "encoded value: " << binary << endl;
+            }
+            
             promise.set_value(binary);
-            this_thread::sleep_for(chrono::seconds(1));
+            this_thread::sleep_for(chrono::milliseconds(delay));
         }};
 
         thread t2{[&]{
@@ -99,7 +111,7 @@ int main(int argc, char* argv[]) {
                 value = LEB128::signedLeb128toDecimal(binary);
             }
             
-            cout << value << endl;
+            cout << "received value: " << value << endl;
         }};
 
         t1.join();
