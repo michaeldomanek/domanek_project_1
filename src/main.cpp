@@ -1,6 +1,7 @@
 #include "leb128.h"
 #include "CLI11.hpp"
 #include "json.hpp"
+#include "toml.hpp"
 
 #include <iostream>
 #include <thread>
@@ -13,6 +14,7 @@
 
 using namespace std;
 using json = nlohmann::json;
+using namespace toml;
 
 int getNextElement(const vector<int> &values) {
     static vector<int>::size_type i = 0;
@@ -68,16 +70,61 @@ int main(int argc, char* argv[]) {
     string jsonOutputName;
     app.add_option("--json-output-name", jsonOutputName, "Name of json output file");
 
-    string tomlOutputName;
-    app.add_option("--toml-output-name", tomlOutputName, "Name of toml output file");
-
-    string fileOutputname;
-    app.add_option("--file-output-name", fileOutputname, "Name of plain output file");
+    string tomlPath;
+    app.add_option("--toml-path", tomlPath, "Name of toml configuration file (overrides)");
 
     startOption->excludes(valuesOption);
     endOption->excludes(valuesOption);
 
     CLI11_PARSE(app, argc, argv);
+
+    if(tomlPath != "") {
+        table configuration;
+        try {
+            configuration = parse_file(tomlPath);
+            if(configuration["values"] && (configuration["start"] || configuration["end"])) {
+                return throwValidationError(app, "values can't be combined with start or end");
+            }
+
+            if(configuration["values"]) {
+                for (const auto &elem : *configuration["values"].as_array()) {
+                    int val{elem.value<int>().value()};
+                    if(val < -100000 || val > 100000) {
+                        return throwValidationError(app, "values not in range -100000 to 100000");
+                    }
+                    values.push_back(val);
+                }
+            } else {
+                if (configuration["start"]) {
+                    start = configuration["start"].value<int>().value();
+                    if(start < -100000 || start > 100000) {
+                        return throwValidationError(app, "start not in range -100000 to 100000");
+                    }
+                }
+
+                if (configuration["end"]) {
+                    end = configuration["end"].value<int>().value();
+                    if(end < -100000 || end > 100000) {
+                        return throwValidationError(app, "end not in range -100000 to 100000");
+                    }
+                }
+            }
+
+            if(configuration["unsigned"]) {
+                transferUnsigned = configuration["unsigned"].value<bool>().value();
+            }
+            if(configuration["show-encoded"]) {
+                showEncoded = configuration["show-encoded"].value<bool>().value();
+            }
+            if(configuration["delay"]) {
+                delay = configuration["delay"].value<unsigned short>().value();
+            }
+
+        } catch (const toml::parse_error& err) {
+            cerr << "error in configuation file - parsing failed:\n" << err << "\n";
+            return 1;
+        }
+    }
 
     if (start == -100001) {
         start = transferUnsigned ? 0 : -100000;

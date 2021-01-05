@@ -11,23 +11,22 @@ Standartmäßig werden zufällige Dezimalzahlen zu signed LEB128 konvertiert und
 Über Kommandozeileninterface ist es möglich:
 - unsigned LEB128 zu verwenden
 - Start und Ende des Bereichs der Zufallszahlen festzulegen
-- Werte über CLI einlesen und dauerhaft übertragen
-- Werte in Kommandozeile ausgeben oder in JSON, TOML, oder plain file schreiben
+- Werte über CLI einlesen und wiederholt übertragen
+- Werte in Kommandozeile ausgeben oder in JSON schreiben
 - Dauer zwischen der Übertragung festlegen
+- TOML Konfigurationsfile einlesen die alle genannten Optionen beinhalten kann 
 
 
 ## Issues
 Hier sind die [Issues](/../../issues)
 
-
 ## Libaries
 - [CLI11](https://github.com/CLIUtils/CLI11)
-- [fmt](https://github.com/fmtlib/fmt)
+- [fmt](https://github.com/fmtlib/fmt) <!-- fehlt -->
 - [json](https://github.com/nlohmann/json)
-- [spdlog](https://github.com/gabime/spdlog)
+- [spdlog](https://github.com/gabime/spdlog) <!-- fehlt -->
 - [toml++](https://github.com/marzer/tomlplusplus/)
-- [tfile](https://github.com/rec/tfile)
 ### vielleicht
 - [criterion](https://github.com/p-ranav/criterion)
-- [pprint](https://github.com/p-ranav/pprint)
 - [rang](https://github.com/agauniyal/rang)
+- [tabulate](https://github.com/p-ranav/tabulate)

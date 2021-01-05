@@ -14,8 +14,6 @@ add_global_arguments('-I' + get_option('cli11_include_dir'), language : 'cpp')
 # json: https://github.com/nlohmann/json
 add_global_arguments('-I' + get_option('json_include_dir'), language : 'cpp')
 
-# add additional include global arguments appropriately!
-
 inc_dir = include_directories('include')
 src = ['src/main.cpp']
 
