@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
     CLI::App app{"Simulation of data transfer with LEB128"};
 
     logger->set_level(spdlog::level::trace);
+    logger->set_pattern("[%H:%M:%S] [thread %t] %v");
 
     bool transferUnsigned{false};
     app.add_flag("-u,--unsigned", transferUnsigned, "Encode with unsigned LEB128");

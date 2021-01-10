@@ -18,7 +18,6 @@ Standartmäßig werden zufällige Dezimalzahlen zu signed LEB128 konvertiert und
 
 ## Verwendung
 
-Simulation of data transfer with LEB128
 Usage: leb128 [OPTIONS]
 
 | Option                   | Typ                           | Bedingungen             | Beschreibung                                 |
@@ -39,6 +38,5 @@ Hier sind die [Issues](/../../issues)
 ## Libaries
 - [CLI11](https://github.com/CLIUtils/CLI11)
 - [json](https://github.com/nlohmann/json)
-- [spdlog](https://github.com/gabime/spdlog) <!-- fehlt -->
+- [spdlog](https://github.com/gabime/spdlog)
 - [toml++](https://github.com/marzer/tomlplusplus/)
-- [tabulate](https://github.com/p-ranav/tabulate) <!-- fehlt -->

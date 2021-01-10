@@ -53,8 +53,9 @@ class LEB128 {
         }
 
         string toSignedLeb128(const int &number) {
-            logger->debug("Convert to Sgned LEB128");
+            logger->debug("Convert to signed LEB128");
             logger->debug("Number: " + to_string(number));
+
             if (!number) {
                 logger->debug("Number is zero => return: " + to_string(number));
                 return "00000000";
@@ -71,20 +72,26 @@ class LEB128 {
             }
 
             fillWithSign(binary, number >= 0 ? '0' : '1');
-            logger->debug("2. binary with sign: " + binary);
+            logger->debug("Binary with sign: " + binary);
 
             return translatePosition(binary);   
         }
 
         string toUnsignedLeb128(const int &number) {
+            logger->debug("Convert to unsigned LEB128");
+            logger->debug("Number: " + to_string(number));
+
             if (!number) {
+                logger->debug("Number is zero => return: " + to_string(number));
                 return "00000000";
             }
 
             string binary{bitset<17>(number).to_string()};
             binary.erase(0, binary.find_first_not_of('0'));
+            logger->debug("Binary number: " + binary);
 
             fillWithSign(binary, '0');
+            logger->debug("Binary with sign: " + binary);
 
             return translatePosition(binary);   
         }
@@ -92,6 +99,9 @@ class LEB128 {
         int signedLeb128toDecimal(string value) {
             string binary{""};
             bool isNegative{false};
+
+            logger->debug("Convert signed LEB128 to decimal");
+            logger->debug("LEB128 encoded binary: " + value);
             
             while (true) {
                 bool isLastByte{value.front() == '0'};
@@ -104,24 +114,34 @@ class LEB128 {
                 }
             }
 
+            logger->debug("Binary with translated positions: " + binary);
+
             if (binary.front() == '1') {
                 binary = getTwoscomplement(binary);
+                logger->debug("Two's complement: " + binary);
                 isNegative = true;
             }
 
             binary.erase(0, binary.find_first_not_of('0'));
+
+            logger->debug("Binary number: " + binary);
 
             int decimal = (int)bitset<17>(binary).to_ulong();
 
             if (isNegative) {
                 decimal = -decimal;
             }
+
+            logger->debug("Number: " + to_string(decimal));
             
             return decimal;
         }
 
         int unsignedLeb128toDecimal(string value) {
             string binary{""};
+
+            logger->debug("Convert unsigned LEB128 to decimal");
+            logger->debug("LEB128 encoded binary: " + value);
             
             while (true) {
                 bool isLastByte{value.front() == '0'};
@@ -134,9 +154,15 @@ class LEB128 {
                 }
             }
 
+            logger->debug("Binary with translated positions: " + binary);
+
             binary.erase(0, binary.find_first_not_of('0'));
 
+            logger->debug("Binary number: " + binary);
+
             int decimal = (int)bitset<17>(binary).to_ulong();
+
+            logger->debug("Number: " + to_string(decimal));
             
             return decimal;
         }
