@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     CLI::App app{"Simulation of data transfer with LEB128"};
 
     logger->set_level(spdlog::level::trace);
-    logger->set_pattern("[%H:%M:%S] [thread %t] %v");
+    logger->set_pattern("[%Y %m %d %H:%M:%S,%e] [%l] [thread %t] %v");
 
     bool transferUnsigned{false};
     app.add_flag("-u,--unsigned", transferUnsigned, "Encode with unsigned LEB128");
@@ -86,8 +86,6 @@ int main(int argc, char* argv[]) {
     endOption->excludes(valuesOption);
 
     CLI11_PARSE(app, argc, argv);
-
-    LEB128 leb128{logger};
 
     if(tomlPath != "") {
         table configuration;
@@ -130,6 +128,9 @@ int main(int argc, char* argv[]) {
             if(configuration["delay"]) {
                 delay = configuration["delay"].value<unsigned short>().value();
             }
+            if (configuration["json-output-name"]) {
+                jsonOutputName = configuration["json-output-name"].value<string>().value();
+            }
 
         } catch (const toml::parse_error& err) {
             return throwValidationError(app, "error in configuation file - parsing failed:\n" + string(err.what()));
@@ -169,6 +170,8 @@ int main(int argc, char* argv[]) {
 
     logger->info("===============================================================");
     logger->info("stared new simulation of data transfer with LEB128");
+
+    LEB128 leb128{logger};
 
     while (true) {
         promise<string> promise;

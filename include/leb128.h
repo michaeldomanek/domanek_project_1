@@ -74,7 +74,7 @@ class LEB128 {
             fillWithSign(binary, number >= 0 ? '0' : '1');
             logger->debug("Binary with sign: " + binary);
 
-            return translatePosition(binary);   
+            return translatePosition(binary);
         }
 
         string toUnsignedLeb128(const int &number) {
