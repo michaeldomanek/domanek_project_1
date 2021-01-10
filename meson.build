@@ -9,10 +9,16 @@ thread_dep = dependency('threads')
 add_global_arguments('-I' + get_option('cli11_include_dir'), language : 'cpp')
 
 # spdlog: https://github.com/gabime/spdlog
-# add_global_arguments('-I' + get_option('spdlog_include_dir'), language : 'cpp')
+add_global_arguments('-I' + get_option('spdlog_include_dir'), language : 'cpp')
 
 # json: https://github.com/nlohmann/json
 add_global_arguments('-I' + get_option('json_include_dir'), language : 'cpp')
+
+# tabulate: https://github.com/p-ranav/tabulate
+add_global_arguments('-I' + get_option('tabulate_include_dir'), language : 'cpp')
+
+# toml++: https://github.com/marzer/tomlplusplus/
+add_global_arguments('-I' + get_option('toml_include_dir'), language : 'cpp')
 
 inc_dir = include_directories('include')
 src = ['src/main.cpp']

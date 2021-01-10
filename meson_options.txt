@@ -1,10 +1,6 @@
 option('cli11_include_dir', type : 'string', value : '/home/michael/', description : 'the dir containing CLI11.hpp')
-option('criterion_include_dir', type : 'string', value : '', description : 'the dir containing criterion.hpp')
-option('fmt_include_dir', type : 'string', value : '', description : 'the include dir of fmt')
 option('json_include_dir', type : 'string', value : '/home/michael/', description : 'the include dir of json')
-option('magic_enum_include_dir', type : 'string', value : '', description : 'the dir containing magic_enum.hpp')
-option('pprint_include_dir', type : 'string', value : '', description : 'the dir containing pprint.hpp')
-option('rang_include_dir', type : 'string', value : '', description : 'the dir containing rang.hpp')
-option('spdlog_include_dir', type : 'string', value : '', description : 'the include dir of spdlog')
+option('spdlog_include_dir', type : 'string', value : '/home/michael/spdlog/include/', description : 'the include dir of spdlog')
+option('tabulate_include_dir', type : 'string', value : '/home/michael/', description : 'the dir containing tabulate.hpp')
 option('toml_include_dir', type : 'string', value : '/home/michael/', description : 'the include dir of toml++')
-option('tfile_include_dir', type : 'string', value : '/home/michael/', description : 'the dir containing tfile.h')
+

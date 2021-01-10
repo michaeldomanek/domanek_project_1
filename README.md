@@ -16,17 +16,29 @@ Standartmäßig werden zufällige Dezimalzahlen zu signed LEB128 konvertiert und
 - Dauer zwischen der Übertragung festlegen
 - TOML Konfigurationsfile einlesen die alle genannten Optionen beinhalten kann 
 
+## Verwendung
+
+Simulation of data transfer with LEB128
+Usage: leb128 [OPTIONS]
+
+| Option                   | Typ                           | Bedingungen             | Beschreibung                                 |
+| ------------------------ | ----------------------------- | ----------------------- | -------------------------------------------- |
+| -h,--help                | FLAG                          |                         | Print this help message and exit             |
+| -u,--unsigned            | FLAG                          |                         | Encode with unsigned LEB128                  |
+| --show-encoded           | FLAG                          |                         | Show encoded values                          |
+| -s,--start               | INT:INT in [-100000 - 100000] | Excludes: --values      | Start of the range of random numbers         |
+| -e,--end                 | INT:INT in [-100000 - 100000] | Excludes: --values      | End of the range of random numbers           |
+| -d,--delay               | UINT                          |                         | Delay between data transfer in ms            |
+| -v,--values              | INT:INT in [-100000 - 100000] | Excludes: --start --end | Values to transfer in a loop                 |
+| --json-output-name       | TEXT                          |                         | Name of json output file                     |
+| --toml-path              | TEXT:FILE                     |                         | Name of toml configuration file (overrides)  |
 
 ## Issues
 Hier sind die [Issues](/../../issues)
 
 ## Libaries
 - [CLI11](https://github.com/CLIUtils/CLI11)
-- [fmt](https://github.com/fmtlib/fmt) <!-- fehlt -->
 - [json](https://github.com/nlohmann/json)
 - [spdlog](https://github.com/gabime/spdlog) <!-- fehlt -->
 - [toml++](https://github.com/marzer/tomlplusplus/)
-### vielleicht
-- [criterion](https://github.com/p-ranav/criterion)
-- [rang](https://github.com/agauniyal/rang)
-- [tabulate](https://github.com/p-ranav/tabulate)
+- [tabulate](https://github.com/p-ranav/tabulate) <!-- fehlt -->

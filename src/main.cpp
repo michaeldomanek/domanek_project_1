@@ -2,6 +2,8 @@
 #include "CLI11.hpp"
 #include "json.hpp"
 #include "toml.hpp"
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
 #include <iostream>
 #include <thread>
@@ -16,6 +18,8 @@ using namespace std;
 using json = nlohmann::json;
 using namespace toml;
 
+auto logger = spdlog::basic_logger_mt("LEB128 Logger", "./leb128.log");
+
 int getNextElement(const vector<int> &values) {
     static vector<int>::size_type i = 0;
     if(i == values.size()) {
@@ -26,6 +30,7 @@ int getNextElement(const vector<int> &values) {
 
 auto throwValidationError(const CLI::App &app, const string &error) {
     try {
+        logger->error(error);
         throw CLI::ValidationError(error);
     } catch (const CLI::Error &e) {
         return app.exit(e);
@@ -39,6 +44,8 @@ auto writeJsonFile(const string &name, const json &outputJson) {
 
 int main(int argc, char* argv[]) {
     CLI::App app{"Simulation of data transfer with LEB128"};
+
+    logger->set_level(spdlog::level::trace);
 
     bool transferUnsigned{false};
     app.add_flag("-u,--unsigned", transferUnsigned, "Encode with unsigned LEB128");
@@ -71,12 +78,15 @@ int main(int argc, char* argv[]) {
     app.add_option("--json-output-name", jsonOutputName, "Name of json output file");
 
     string tomlPath;
-    app.add_option("--toml-path", tomlPath, "Name of toml configuration file (overrides)");
+    app.add_option("--toml-path", tomlPath, "Name of toml configuration file (overrides)")
+    ->check(CLI::ExistingFile);
 
     startOption->excludes(valuesOption);
     endOption->excludes(valuesOption);
 
     CLI11_PARSE(app, argc, argv);
+
+    LEB128 leb128{logger};
 
     if(tomlPath != "") {
         table configuration;
@@ -121,8 +131,7 @@ int main(int argc, char* argv[]) {
             }
 
         } catch (const toml::parse_error& err) {
-            cerr << "error in configuation file - parsing failed:\n" << err << "\n";
-            return 1;
+            return throwValidationError(app, "error in configuation file - parsing failed:\n" + string(err.what()));
         }
     }
 
@@ -157,6 +166,9 @@ int main(int argc, char* argv[]) {
         writeJsonFile(jsonOutputName, outputJson);
     }
 
+    logger->info("===============================================================");
+    logger->info("stared new simulation of data transfer with LEB128");
+
     while (true) {
         promise<string> promise;
         future<string> future{promise.get_future()};
@@ -174,9 +186,9 @@ int main(int argc, char* argv[]) {
             cout << "value to transfer: " << value << endl;
 
             if (transferUnsigned) {
-                binary = LEB128::toUnsignedLeb128(value);
+                binary = leb128.toUnsignedLeb128(value);
             } else {
-                binary = LEB128::toSignedLeb128(value);
+                binary = leb128.toSignedLeb128(value);
             }
 
             if(jsonOutputName != "") {
@@ -197,9 +209,9 @@ int main(int argc, char* argv[]) {
             int value;
 
             if (transferUnsigned) {
-                value = LEB128::unsignedLeb128toDecimal(binary);
+                value = leb128.unsignedLeb128toDecimal(binary);
             } else {
-                value = LEB128::signedLeb128toDecimal(binary);
+                value = leb128.signedLeb128toDecimal(binary);
             }
 
             if(jsonOutputName != "") {
